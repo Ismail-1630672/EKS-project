@@ -1,0 +1,15 @@
+crds:
+  enabled: true
+
+extraArgs:
+- --dns01-recursive-nameservers="8.8.8.8:53"
+- --dns01-recursive-nameservers-only
+
+#These extraArgs configure cert manager so that it uses reliable and public DNS's for dns-01 
+#challenges or dns resolutions rather than relying on built in cluster DNS (coreDNS)
+#which can be unreliable and cached potentially leading to ACME validation failures.
+
+# permissions for cert-manager
+serviceAccount:
+  annotations:
+    eks.amazonaws.com/role-arn: ""
