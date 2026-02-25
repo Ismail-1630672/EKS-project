@@ -1,0 +1,11 @@
+controller:
+  replicaCount: 1
+
+  service:
+    type: LoadBalancer
+    create: true 
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: nlb
+      service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+      service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+      external-dns.alpha.kubernetes.io/hostname: app.ismail-osman.co.uk
