@@ -1,0 +1,16 @@
+provider: aws
+
+env:
+- name: AWS_DEFAULT_REGION
+  value: eu-west-2
+
+
+#permissions for external-dns
+serviceAccount:
+  create: true 
+  annotations:
+    eks.amazonaws.com/role-arn:
+
+#Here we are basically telling route 53 to only control this particular domain for now
+domainFilters:
+- app.ismail-osman.co.uk
