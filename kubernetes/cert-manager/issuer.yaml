@@ -1,0 +1,22 @@
+apiVersion: cert-manager.io/v1 
+kind: ClusterIssuer
+metadata:
+  name: tls-cert-issuer 
+spec:
+  acme: 
+    server: https://acme-v02.api.letsencrypt.org/directory #production server
+    email: "osy.ish2000@outlook.com"
+    privateKeySecretRef:
+      name: tls-cert-issuer
+    solvers: #here cert manager is proving domain ownership to the trusted certificate authority
+    - dns01: 
+        route53: #proves ownership by creating a dns txt record
+          region: eu-west-2
+          hostedZoneID: Z083548735DYEK5QEE9NA
+          
+      selector:
+        dnsZones:
+        - "app.ismail-osman.co.uk"
+    - http01:
+        ingress:
+          class: nginx
