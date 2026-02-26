@@ -11,6 +11,10 @@ WORKDIR /app
 
 COPY --from=buildtime /app/index.html /app/index.html
 
+COPY --from=buildtime /app/js/ /app/js
+
+COPY --from=buildtime /app/style/ /app/style 
+
 RUN groupadd --gid 1000 my_group && useradd --uid 1000 --gid 1000 -m my_user 
 
 RUN chown -R my_user:my_group /app
