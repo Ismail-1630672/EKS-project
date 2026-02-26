@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1 
+kind: Application
+metadata:
+  name: argocd-application 
+  namespace: argocd #use argocd name space to add the resources
+spec:
+  project: default #the project the application belongs to
+  source: #desired state in git
+    repoURL: https://github.com/Ismail-1630672/EKS-project.git 
+    targetRevision: HEAD 
+    path: kubernetes/deployments
+    
+      
+  destination: #where to deploy, basically reference to the target cluster and namespace
+    server: https://kubernetes.default.svc #points to kubernetes API server for cluster which is the entrypoint
+    namespace: default  
+  
+  #now control how argo cd keeps the cluster in sync with git 
+  syncPolicy:
+    automated: #enables automatic sync rather than manual button
+      enabled: true 
+      prune: true #deletes resources from cluster that were removed from git
+      selfHeal: true #fixes configuration drift automatically ensuring git remains the single source of truth
+    syncOptions:
+    - CreateNameSpace=true #this ensures the namespace destination.namespace exists in the cluster
