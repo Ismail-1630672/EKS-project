@@ -1,5 +1,5 @@
 crds:
-  enabled: true
+  enabled: true 
 
 extraArgs:
 - --dns01-recursive-nameservers="8.8.8.8:53"
@@ -9,7 +9,8 @@ extraArgs:
 #challenges or dns resolutions rather than relying on built in cluster DNS (coreDNS)
 #which can be unreliable and cached potentially leading to ACME validation failures.
 
-# permissions for cert-manager
+#permissions for cert-manager
 serviceAccount:
+  name: cert-manager 
   annotations:
-    eks.amazonaws.com/role-arn: ""
+    eks.amazonaws.com/role-arn: "arn:aws:iam::598400998600:role/cert-manager"
