@@ -1,2 +1,2 @@
-variable "eks_cluster_name" {
+variable "eks-cluster-name" {
 }
