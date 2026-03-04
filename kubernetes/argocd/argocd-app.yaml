@@ -8,7 +8,7 @@ spec:
   source: #desired state in git
     repoURL: https://github.com/Ismail-1630672/EKS-project.git 
     targetRevision: HEAD 
-    path: kubernetes/deployments
+    path: deployments
     
       
   destination: #where to deploy, basically reference to the target cluster and namespace
