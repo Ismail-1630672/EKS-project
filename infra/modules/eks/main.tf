@@ -2,9 +2,6 @@ resource "aws_eks_cluster" "eks_cluster" {
   name     = var.cluster_name
   role_arn = var.eks_role_arn
   version  = var.kubernetes_version
-  
-
-  
 
   access_config {
     authentication_mode                         = "API" #users are authenticated and gain entrypoint to eks cluster via API
@@ -13,30 +10,133 @@ resource "aws_eks_cluster" "eks_cluster" {
 
   vpc_config {
     subnet_ids              = flatten([var.public_subnet_id, var.private_subnet_id]) #worker nodes in private, control plane in public
-    endpoint_public_access  = true  #enables access of kube API server by the internet
-    endpoint_private_access = false #ensures traffic between control plane and worker nodes stays within aws network, very secure
+    endpoint_public_access  = true                                                   #enables access of kube API server by the internet
+    endpoint_private_access = false                                                  #ensures traffic between control plane and worker nodes stays within aws network, very secure
 
   }
 
   depends_on = [var.eks_cluster_policy]
 }
 
-resource "aws_eks_node_group" "eks_worker_node" {
-    cluster_name = aws_eks_cluster.eks_cluster.name 
-    node_role_arn = var.eks-node-arn
-    node_group_name = var.node-group-name
-    subnet_ids = flatten([var.private_subnet_id])
+data "tls_certificate" "eks" {
+  url = aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
+}
 
-    scaling_config {
-      min_size = 3 
-      max_size = 5
-      desired_size = 3 
+resource "aws_iam_openid_connect_provider" "eks" {
+  url             = aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
+}
+
+data "aws_iam_policy_document" "csi" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Federated"
+      identifiers = [aws_iam_openid_connect_provider.eks.arn]
     }
 
-    ami_type = "AL2023_x86_64_STANDARD"
-    instance_types = ["m7i-flex.large"]
+    actions = [
+      "sts:AssumeRoleWithWebIdentity",
+    ]
 
-    depends_on = [var.eks-node-policy]
+    condition {
+      test     = "StringEquals"
+      variable = "${aws_iam_openid_connect_provider.eks.url}:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "${aws_iam_openid_connect_provider.eks.url}:sub"
+      values   = ["system:serviceaccount:kube-system:ebs-csi-controller-sa"]
+    }
+
+  }
+}
+
+resource "aws_iam_role" "eks_ebs_csi_driver" {
+  assume_role_policy = data.aws_iam_policy_document.csi.json
+  name               = "eks-ebs-csi-driver"
+}
+
+resource "aws_iam_role_policy_attachment" "amazon_ebs_csi_driver" {
+  role       = aws_iam_role.eks_ebs_csi_driver.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+}
+
+
+resource "aws_iam_role" "ebs-csi-role" {
+  name = "ebs-csi-role"
+  assume_role_policy = jsonencode({
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ec2:CreateVolume",
+        "ec2:AttachVolume",
+        "ec2:DetachVolume",
+        "ec2:DeleteVolume",
+        "ec2:CreateSnapshot",
+        "ec2:DeleteSnapshot",
+        "ec2:DescribeVolumes",
+        "ec2:DescribeSnapshots",
+        "ec2:DescribeInstances",
+        "ec2:DescribeAvailabilityZones",
+        "ec2:DescribeVolumeStatus",
+        "ec2:DescribeVolumeAttribute",
+        "ec2:DescribeSnapshotAttribute",
+        "ec2:DescribeInstanceAttribute",
+        "ec2:DescribeInstanceCreditSpecifications",
+        "ec2:DescribeVolumeTypes",
+        "ec2:DescribeVpcAttribute",
+        "ec2:DescribeVpcEndpoints",
+        "ec2:DescribeVpcs",
+        "ec2:ModifyVolume",
+        "ec2:ModifyVolumeAttribute",
+        "ec2:ModifyInstanceAttribute"
+      ],
+      "Principal" = {
+        Service = "ec2.amazonaws.com"
+      }
+      Action = "sts:AssumeRole"
+      }
+
+      
+    
+  ]
+})
+
+}
+
+
+
+resource "aws_iam_role_policy_attachment" "ebs-csi-policy" {
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+  role       = aws_iam_role.ebs-csi-role.name
+}
+
+
+
+resource "aws_eks_node_group" "eks_worker_node" {
+  cluster_name    = aws_eks_cluster.eks_cluster.name
+  node_role_arn   = var.eks-node-arn
+  node_group_name = var.node-group-name
+  subnet_ids      = flatten([var.private_subnet_id])
+
+
+  scaling_config {
+    min_size     = 3
+    max_size     = 5
+    desired_size = 3
+  }
+
+  ami_type       = "AL2023_x86_64_STANDARD"
+  instance_types = ["m7i-flex.large"]
+
+  depends_on = [var.eks-node-policy]
 }
 
 #EKS add-ons, these ensure consistent configuration and automated updates
@@ -46,55 +146,96 @@ resource "aws_eks_node_group" "eks_worker_node" {
 
 #First get the latest add on versions
 data "aws_eks_addon_version" "vpc-cni" {
-    addon_name = "vpc-cni"
-    kubernetes_version = aws_eks_cluster.eks_cluster.version 
-    most_recent = true 
+  addon_name         = "vpc-cni"
+  kubernetes_version = aws_eks_cluster.eks_cluster.version
+  most_recent        = true
 }
 
 data "aws_eks_addon_version" "core-dns" {
-    addon_name = "coredns"
-    kubernetes_version = aws_eks_cluster.eks_cluster.version 
-    most_recent = true 
+  addon_name         = "coredns"
+  kubernetes_version = aws_eks_cluster.eks_cluster.version
+  most_recent        = true
 }
 
 
 data "aws_eks_addon_version" "kube-proxy" {
-    addon_name = "kube-proxy"
-    kubernetes_version = aws_eks_cluster.eks_cluster.version 
-    most_recent = true 
+  addon_name         = "kube-proxy"
+  kubernetes_version = aws_eks_cluster.eks_cluster.version
+  most_recent        = true
 }
 
-resource "aws_eks_addon" "vpc-cni" {
-    cluster_name = aws_eks_cluster.eks_cluster.name 
-    addon_name = "vpc-cni"
-    addon_version = data.aws_eks_addon_version.vpc-cni.version
+data "aws_eks_addon_version" "ebs-csi-driver" {
+  addon_name         = "aws-ebs-csi-driver"
+  kubernetes_version = aws_eks_cluster.eks_cluster.version
+  most_recent        = true
 
-    resolve_conflicts_on_create = "OVERWRITE" #applies when add-on is being created, overwrites existing one
-    resolve_conflicts_on_update = "PRESERVE" #applies when add-on is updated
+}
+
+data "aws_eks_addon_version" "pod-identity-agent" {
+  addon_name         = "eks-pod-identity-agent"
+  kubernetes_version = aws_eks_cluster.eks_cluster.version
+  most_recent        = true
+
+}
+
+
+
+resource "aws_eks_addon" "vpc-cni" {
+  cluster_name  = aws_eks_cluster.eks_cluster.name
+  addon_name    = "vpc-cni"
+  addon_version = data.aws_eks_addon_version.vpc-cni.version
+
+  resolve_conflicts_on_create = "OVERWRITE" #applies when add-on is being created, overwrites existing one
+  resolve_conflicts_on_update = "PRESERVE"  #applies when add-on is updated
 }
 
 resource "aws_eks_addon" "core-dns" {
-    cluster_name = aws_eks_cluster.eks_cluster.name 
-    addon_name = "coredns"
-    addon_version = data.aws_eks_addon_version.core-dns.version  
+  cluster_name  = aws_eks_cluster.eks_cluster.name
+  addon_name    = "coredns"
+  addon_version = data.aws_eks_addon_version.core-dns.version
 
-    resolve_conflicts_on_create = "OVERWRITE"
-    resolve_conflicts_on_update = "PRESERVE"
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "PRESERVE"
 
-    depends_on = [aws_eks_node_group.eks_worker_node]
+  depends_on = [aws_eks_node_group.eks_worker_node]
 
-    
+
 }
 
 
 
 resource "aws_eks_addon" "kube-proxy" {
-    cluster_name = aws_eks_cluster.eks_cluster.name 
-    addon_name = "kube-proxy"
-    addon_version = data.aws_eks_addon_version.kube-proxy.version  
+  cluster_name  = aws_eks_cluster.eks_cluster.name
+  addon_name    = "kube-proxy"
+  addon_version = data.aws_eks_addon_version.kube-proxy.version
 
-    resolve_conflicts_on_create = "OVERWRITE"
-    resolve_conflicts_on_update = "PRESERVE"
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "PRESERVE"
 
-    
 }
+
+resource "aws_eks_addon" "ebs-csi-driver" {
+  cluster_name             = aws_eks_cluster.eks_cluster.name
+  addon_name               = "aws-ebs-csi-driver"
+  addon_version            = data.aws_eks_addon_version.ebs-csi-driver.version
+  service_account_role_arn = aws_iam_role.eks_ebs_csi_driver.arn
+
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "PRESERVE"
+
+  depends_on = [aws_iam_role_policy_attachment.ebs-csi-policy, aws_eks_node_group.eks_worker_node]
+
+}
+
+resource "aws_eks_addon" "pod-identity-agent" {
+  cluster_name = aws_eks_cluster.eks_cluster.name 
+  addon_name   = "eks-pod-identity-agent"
+  addon_version = data.aws_eks_addon_version.pod-identity-agent.version 
+
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "PRESERVE"
+
+  
+}
+
+
