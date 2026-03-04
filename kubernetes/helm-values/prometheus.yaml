@@ -1,0 +1,34 @@
+prometheus-node-exporter:
+  enabled: true 
+  containerSecurityContext: 
+    allowPrivilegeEscalation: false #strengthens container isolation
+
+server:
+  name: server 
+  releaseNamespace: false 
+  enableServiceLinks: true 
+  configPath: /etc/config/prometheus.yml 
+  dnsPolicy: ClusterFirst
+  daemonSet:
+    enabled: true #runs prometheus agent on every node of cluster
+  persistentVolume:
+    enabled: false  
+    # accessModes: 
+    #   - ReadWriteOnce
+    # mountPath: /data
+    # existingClaim: ""
+    # size: 8Gi
+    # storageClass: "gp2"
+
+
+alertmanager:
+  enabled: false  
+  persistentVolume:
+    enabled: false  
+    # accessModes: 
+    #   - ReadWriteOnce
+    # size: 2Gi
+    # storageClass: "gp2"
+
+kube-state-metrics:
+  enabled: true 
