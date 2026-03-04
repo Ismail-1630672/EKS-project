@@ -1,20 +1,20 @@
 variable "vpc_cidr" {
-    type = string
-    description = "IP range for my vpc"
+  type        = string
+  description = "IP range for my vpc"
 }
 
 variable "project_name" {
-    type = string 
-    description = "name of my project"
+  type        = string
+  description = "name of my project"
 }
 
 variable "az_count" {
-    type = number 
-    description = "number of availability zones"
+  type        = number
+  description = "number of availability zones"
 }
 
 variable "sg_name" {
-    type= string 
-    description = "name of security group"
+  type        = string
+  description = "name of security group"
 }
 
