@@ -18,24 +18,24 @@ repositories:
   - name: argo
     url: https://argoproj.github.io/argo-helm
 
-  - name: prometheus
-    url: https://prometheus-community.github.io/helm-charts
+#   # - name: prometheus
+#   #   url: https://prometheus-community.github.io/helm-charts
   
-  - name: grafana 
-    url: https://grafana.github.io/helm-charts
+#   # - name: grafana 
+#   #   url: https://grafana.github.io/helm-charts
 
 releases:
   - name: ingress-nginx
     namespace: ingress-nginx
     chart: ingress-nginx/ingress-nginx
-    version: "4.14.1"
+    version: "4.14.3"
     values:
       - helm-values/nginx-ingress.yaml
   
   - name: cert-manager
     namespace: cert-manager
     chart: cert-manager/cert-manager
-    version: "1.19.2"
+    version: "1.19.4"
     values: 
       - helm-values/cert-manager.yaml 
     
@@ -53,16 +53,16 @@ releases:
     values: 
       - helm-values/argo-cd.yaml 
 
-  - name: prometheus
-    namespace: prometheus
-    chart: prometheus/prometheus
-    version: "28.9.1"
-    values:
-      - helm-values/prometheus.yaml 
+  # - name: prometheus
+  #   namespace: prometheus
+  #   chart: prometheus/prometheus
+  #   version: "28.10.0"
+  #   values:
+  #     - helm-values/prometheus.yaml  
   
-  - name: grafana 
-    namespace: grafana 
-    chart: grafana/grafana 
-    version: "10.5.15"
-    values:
-      - helm-values/grafana.yaml 
+  # - name: grafana 
+  #   namespace: grafana 
+  #   chart: grafana/grafana 
+  #   version: "10.5.15"
+  #   values:
+  #     - helm-values/grafana.yaml 
