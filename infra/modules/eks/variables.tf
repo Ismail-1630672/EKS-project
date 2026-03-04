@@ -27,12 +27,14 @@ variable "eks-node-arn" {
 }
 
 variable "node-group-name" {
-    type = string 
-    description = "name of node group"
+  type        = string
+  description = "name of node group"
 }
 
 variable "eks-node-policy" {
 }
+
+
 
 
 
