@@ -8,7 +8,7 @@ module "vpc" {
 
 module "IAM" {
   source           = "./modules/IAM"
-  eks_cluster_name = module.eks.eks-cluster_name
+  eks-cluster-name = module.eks.eks-cluster-name
 }
 
 module "eks" {
@@ -23,7 +23,5 @@ module "eks" {
   eks-node-arn       = module.IAM.eks-node-arn
   node-group-name    = var.node-group-name
   eks-node-policy    = module.IAM.eks-node-policy
-
-
 }
 
