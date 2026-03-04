@@ -74,8 +74,8 @@ output "eks-cluster-policy" {
   value = module.IAM.eks-cluster-policy
 }
 
-output "eks-cluster_name" {
-  value = module.eks.eks-cluster_name
+output "eks-cluster-name" {
+  value = module.eks.eks-cluster-name
 }
 
 output "eks-node-policy" {
@@ -93,4 +93,23 @@ output "core-dns-version" {
 output "kube-proxy-version" {
   value = module.eks.kube-proxy-version
 }
+
+output "ebs-csi-version" {
+  value = module.eks.ebs-csi-version
+}
+
+output "pod-identity-agent-version" {
+  value = module.eks.pod-identity-agent-version
+}
+  
+  
+
+
+
+
+
+
+
+
+
 
