@@ -1,0 +1,72 @@
+# Deployment
+apiVersion: apps/v1
+kind: Deployment 
+metadata:
+  name: ismail-deployment 
+  
+  labels:
+    app: ismail-deployment 
+spec:
+  replicas: 1
+  selector:
+    matchLabels: 
+      app: ismail-deployment 
+  template:
+    metadata: 
+      labels:
+        app: ismail-deployment 
+    spec:
+      containers: 
+      - name: game-app 
+        image: 598400998600.dkr.ecr.eu-west-2.amazonaws.com/game-app:latest
+        ports:
+        - containerPort: 3000
+
+---
+
+# Service
+apiVersion: v1 
+kind: Service
+metadata:
+  name: ismail-service 
+spec:
+  selector: 
+    app: ismail-deployment 
+  type: ClusterIP 
+  ports:
+  - name: http 
+    protocol: TCP
+    port: 80
+    targetPort: 3000
+  - name: app-port 
+    protocol: TCP 
+    port: 8086 
+    targetPort: 3000
+
+---
+
+# Ingress
+apiVersion: networking.k8s.io/v1 
+kind: Ingress 
+metadata:
+  name: ismail-ingress 
+  
+  annotations: #specify cluster issuer so cert-manager knows who is responsible for issuing tls certificates for this ingress
+    cert-manager.io/cluster-issuer: "tls-cert-issuer"
+spec: 
+  ingressClassName: nginx 
+  tls: #ingress is responsible for terminating https (tls) traffic before it gets routed to services
+  - hosts: 
+      - k8s.app.ismail-osman.co.uk
+    secretName: my-secret 
+  rules: 
+  - host: k8s.app.ismail-osman.co.uk
+    http: 
+      paths: 
+      - path: / # traffic from anywhere for the host k8s.app.ismail-osman.co.uk
+        pathType: Prefix #the beginning part
+        backend: 
+          service: 
+            name: ismail-service 
+            port:
+              number: 80
