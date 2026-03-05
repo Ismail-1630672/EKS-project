@@ -18,7 +18,7 @@ spec:
     spec:
       containers: 
       - name: game-app 
-        image: 598400998600.dkr.ecr.eu-west-2.amazonaws.com/game-app:latest
+        image: 598400998600.dkr.ecr.eu-west-2.amazonaws.com/game-app:latest@sha256:6cdcbd4a2a01e5a3bbe1c611b2bd128506776b27eeffb8cf4a95dbae4f8dffe0
         ports:
         - containerPort: 3000
 
