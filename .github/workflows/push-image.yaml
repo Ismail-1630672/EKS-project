@@ -1,0 +1,49 @@
+name: Push to ECR repository 
+
+on:
+    push:
+        branches: [main]
+        paths:
+            - 'app/**' 
+            - '.github/workflows/push-image.yaml'
+
+env:
+    AWS_REGION: ${{ secrets.AWS_REGION }}
+    ECR_REPOSITORY: game-app 
+
+jobs: 
+    push:
+        runs-on: ubuntu-latest 
+        permissions:
+            id-token: write
+            contents: read 
+        
+        steps: 
+            - name: checkout repository 
+              uses: actions/checkout@v4 
+            
+            - name: AWS authentication 
+              uses: aws-actions/configure-aws-credentials@v4 
+              with:
+                role-to-assume: ${{ secrets.ROLE_ARN }}  
+                aws-region: ${{ secrets.AWS_REGION }}
+
+            - name: login to AWS ECR 
+              id: login-ecr 
+              uses: aws-actions/amazon-ecr-login@v2 
+            
+            - name: build image
+              run: |
+                cd app 
+                docker build -t game-app .
+                docker tag game-app:latest ${{ secrets.IMAGE_TAG_ID }}
+            
+            - name: Trivy to scan image for vulnerabilities
+              uses: aquasecurity/trivy-action@master
+              with:
+                image-ref: ${{ secrets.IMAGE_TAG_ID }}
+
+            - name: push image to ECR
+              run: | 
+                docker push ${{ secrets.IMAGE_TAG_ID }}
+
