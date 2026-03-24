@@ -25,7 +25,7 @@ jobs:
             - name: AWS authentication 
               uses: aws-actions/configure-aws-credentials@v4
               with:
-                role-to-assume: ${{ secrets.ROLE_ARN }} 
+                role-to-assume: ${{ secrets.ROLE_ARN }}
                 aws-region: ${{ secrets.AWS_REGION }}
 
             - name: login to AWS ECR 
