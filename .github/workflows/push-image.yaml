@@ -43,7 +43,7 @@ jobs:
               with:
                 image-ref: ${{ secrets.IMAGE_TAG_ID }}
 
-            - name: push image to ECR 
+            - name: push image to ECR
               run: | 
                 docker push ${{ secrets.IMAGE_TAG_ID }}
 
