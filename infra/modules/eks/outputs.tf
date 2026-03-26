@@ -25,5 +25,5 @@ output "ebs-csi-version" {
 
 output "pod-identity-agent-version" {
   description = "version of addon for pod identity agent"
-  value = data.aws_eks_addon_version.pod-identity-agent.version 
+  value       = data.aws_eks_addon_version.pod-identity-agent.version
 }
