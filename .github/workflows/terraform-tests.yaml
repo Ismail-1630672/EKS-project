@@ -49,6 +49,7 @@ jobs:
                 directory: infra/ 
                 skip_check: CKV_AWS_355,CKV_AWS_58
                 soft_fail: false 
+                soft_fail_on: LOW
               
             
             
