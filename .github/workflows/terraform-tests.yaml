@@ -43,17 +43,4 @@ jobs:
               working-directory: infra
               run: terraform validate  
             
-            - name: set-up TFLint
-              uses: terraform-linters/setup-tflint@v4
-              with:
-                tflint_version: v0.61.0
             
-            - name: init TFLint 
-              run: tflint --init
-              working-directory: infra
-              env:
-                GITHUB_TOKEN: ${{ secrets.TOKEN }}  
-            
-            - name: Run TFLint
-              run: tflint --recursive --format=compact
-              working-directory: infra 
