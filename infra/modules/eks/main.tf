@@ -70,44 +70,44 @@ resource "aws_iam_role_policy_attachment" "amazon_ebs_csi_driver" {
 resource "aws_iam_role" "ebs-csi-role" {
   name = "ebs-csi-role"
   assume_role_policy = jsonencode({
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "ec2:CreateVolume",
-        "ec2:AttachVolume",
-        "ec2:DetachVolume",
-        "ec2:DeleteVolume",
-        "ec2:CreateSnapshot",
-        "ec2:DeleteSnapshot",
-        "ec2:DescribeVolumes",
-        "ec2:DescribeSnapshots",
-        "ec2:DescribeInstances",
-        "ec2:DescribeAvailabilityZones",
-        "ec2:DescribeVolumeStatus",
-        "ec2:DescribeVolumeAttribute",
-        "ec2:DescribeSnapshotAttribute",
-        "ec2:DescribeInstanceAttribute",
-        "ec2:DescribeInstanceCreditSpecifications",
-        "ec2:DescribeVolumeTypes",
-        "ec2:DescribeVpcAttribute",
-        "ec2:DescribeVpcEndpoints",
-        "ec2:DescribeVpcs",
-        "ec2:ModifyVolume",
-        "ec2:ModifyVolumeAttribute",
-        "ec2:ModifyInstanceAttribute"
-      ],
-      "Principal" = {
-        Service = "ec2.amazonaws.com"
-      }
-      Action = "sts:AssumeRole"
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "ec2:CreateVolume",
+          "ec2:AttachVolume",
+          "ec2:DetachVolume",
+          "ec2:DeleteVolume",
+          "ec2:CreateSnapshot",
+          "ec2:DeleteSnapshot",
+          "ec2:DescribeVolumes",
+          "ec2:DescribeSnapshots",
+          "ec2:DescribeInstances",
+          "ec2:DescribeAvailabilityZones",
+          "ec2:DescribeVolumeStatus",
+          "ec2:DescribeVolumeAttribute",
+          "ec2:DescribeSnapshotAttribute",
+          "ec2:DescribeInstanceAttribute",
+          "ec2:DescribeInstanceCreditSpecifications",
+          "ec2:DescribeVolumeTypes",
+          "ec2:DescribeVpcAttribute",
+          "ec2:DescribeVpcEndpoints",
+          "ec2:DescribeVpcs",
+          "ec2:ModifyVolume",
+          "ec2:ModifyVolumeAttribute",
+          "ec2:ModifyInstanceAttribute"
+        ],
+        "Principal" = {
+          Service = "ec2.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
       }
 
-      
-    
-  ]
-})
+
+
+    ]
+  })
 
 }
 
@@ -228,14 +228,14 @@ resource "aws_eks_addon" "ebs-csi-driver" {
 }
 
 resource "aws_eks_addon" "pod-identity-agent" {
-  cluster_name = aws_eks_cluster.eks_cluster.name 
-  addon_name   = "eks-pod-identity-agent"
-  addon_version = data.aws_eks_addon_version.pod-identity-agent.version 
+  cluster_name  = aws_eks_cluster.eks_cluster.name
+  addon_name    = "eks-pod-identity-agent"
+  addon_version = data.aws_eks_addon_version.pod-identity-agent.version
 
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "PRESERVE"
 
-  
+
 }
 
 
