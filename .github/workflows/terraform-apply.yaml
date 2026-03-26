@@ -41,5 +41,5 @@ jobs:
               run: terraform plan 
             
             - name: terraform apply 
-              working-directory: infra
+              working-directory: infra 
               run: terraform apply --auto-approve 
