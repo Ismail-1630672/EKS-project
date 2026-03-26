@@ -1,0 +1,40 @@
+name: Infra deployment
+
+on:
+    push: 
+        branches: [main]
+        paths:
+            - 'infra/**'
+            - '.github/workflows/terraform-apply.yaml'
+
+env:
+    AWS_REGION: ${{ secrets.AWS_REGION }}
+
+jobs:
+    deployment: 
+        name: static-analysis
+        runs-on: ubuntu-latest
+        permissions: 
+            id-token: write
+            contents: read 
+        
+        steps:
+            - name: checkout code 
+              uses: actions/checkout@v4
+            
+            - name: AWS authentication
+              uses: aws-actions/configure-aws-credentials@v4
+              with: 
+                role-to-assume: ${{ secrets.ROLE_ARN }}  
+                aws-region: ${{ secrets.AWS_REGION }}
+            
+            - name: Setup Terraform 
+              uses: hashicorp/setup-terraform@v3 
+            
+            - name: terraform plan
+              working-directory: infra 
+              run: terraform plan 
+            
+            - name: terraform apply 
+              working-directory: infra 
+              run: terraform apply --auto-approve 
