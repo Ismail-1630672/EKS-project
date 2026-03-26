@@ -101,8 +101,8 @@ output "ebs-csi-version" {
 output "pod-identity-agent-version" {
   value = module.eks.pod-identity-agent-version
 }
-  
-  
+
+
 
 
 
