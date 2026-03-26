@@ -81,39 +81,39 @@ data "aws_iam_policy_document" "cert-manager" {
 resource "aws_iam_policy" "cert-manager-iam-policy" {
   name = "cert-manager-iam-policy"
   policy = jsonencode({
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": "route53:GetChange",
-      "Resource": "arn:aws:route53:::change/*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "route53:ChangeResourceRecordSets",
-        "route53:ListResourceRecordSets"
-      ],
-      "Resource": "arn:aws:route53:::hostedzone/Z0075379YVJ2NJZFXYU",
-      "Condition": {
-        "ForAllValues:StringEquals": {
-          "route53:ChangeResourceRecordSetsRecordTypes": ["TXT"]
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : "route53:GetChange",
+        "Resource" : "arn:aws:route53:::change/*"
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "route53:ChangeResourceRecordSets",
+          "route53:ListResourceRecordSets"
+        ],
+        "Resource" : "arn:aws:route53:::hostedzone/Z0075379YVJ2NJZFXYU",
+        "Condition" : {
+          "ForAllValues:StringEquals" : {
+            "route53:ChangeResourceRecordSetsRecordTypes" : ["TXT"]
+          }
         }
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : "route53:ListHostedZonesByName",
+        "Resource" : "*"
       }
-    },
-    {
-      "Effect": "Allow",
-      "Action": "route53:ListHostedZonesByName",
-      "Resource": "*"
-    }
-  ]
-})
+    ]
+  })
 }
 
 #IAM role for pod identity with trust policy
 resource "aws_iam_role" "cert-manager-pod-identity-role" {
   name               = "cert-manager"
-  assume_role_policy = data.aws_iam_policy_document.cert-manager.json 
+  assume_role_policy = data.aws_iam_policy_document.cert-manager.json
 }
 
 #attach policy to IAM role
@@ -178,7 +178,7 @@ resource "aws_iam_policy" "external-dns-iam-policy" {
 #IAM role for pod identity with trust policy
 resource "aws_iam_role" "external-dns-pod-identity-role" {
   name               = "external-dns"
-  assume_role_policy = data.aws_iam_policy_document.external-dns.json 
+  assume_role_policy = data.aws_iam_policy_document.external-dns.json
 }
 
 #attach policy to IAM role
