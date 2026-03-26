@@ -43,4 +43,9 @@ jobs:
               working-directory: infra
               run: terraform validate  
             
+            - name: Run Checkov 
+              uses: bridgecrewio/checkov-action@v12
+              with: 
+                directory: infra/ 
+            
             
