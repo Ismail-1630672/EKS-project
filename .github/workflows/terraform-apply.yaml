@@ -12,7 +12,7 @@ env:
 
 jobs:
     deployment: 
-        name: static-analysis
+        name: infra deployment 
         runs-on: ubuntu-latest
         permissions: 
             id-token: write
@@ -30,6 +30,11 @@ jobs:
             
             - name: Setup Terraform 
               uses: hashicorp/setup-terraform@v3 
+            
+            - name: terraform init
+              working-directory: infra 
+              run: terraform init 
+            
             
             - name: terraform plan
               working-directory: infra 
