@@ -1,3 +1,3 @@
 variable "eks-cluster-name" {
-    type = string 
+  type = string
 }
