@@ -1,7 +1,7 @@
 prometheus-node-exporter:
   enabled: true 
   containerSecurityContext: 
-    allowPrivilegeEscalation: false #strengthens container isolation
+    allowPrivilegeEscalation: false 
 
 server:
   name: server 
@@ -10,7 +10,7 @@ server:
   configPath: /etc/config/prometheus.yml 
   dnsPolicy: ClusterFirst
   daemonSet:
-    enabled: true #runs prometheus agent on every node of cluster
+    enabled: true 
   persistentVolume:
     enabled: false  
     # accessModes: 

@@ -4,19 +4,16 @@ metadata:
   name: tls-cert-issuer 
 spec:
   acme: 
-    server: https://acme-v02.api.letsencrypt.org/directory #production server
+    server: https://acme-v02.api.letsencrypt.org/directory 
     email: "osy.ish2000@outlook.com"
     privateKeySecretRef:
       name: tls-cert-issuer
-    solvers: #here cert manager is proving domain ownership to the trusted certificate authority
+    solvers: 
     - dns01: 
-        route53: #proves ownership by creating a dns txt record
+        route53: 
           region: eu-west-2
           hostedZoneID: Z0075379YVJ2NJZFXYU
-          # auth:
-          #   kubernetes:
-          #     serviceAccountRef:
-          #       name: cert-manager-acme-dns01-route53 #automatically creates, updates, and removes DNS TXT records in Route 53 to verify domain ownership for Let's Encrypt certificates, enabling automated issuance of wildcards.
+          
           
       selector:
         dnsZones:
